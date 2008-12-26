@@ -4,3 +4,4 @@ module Chaps
 end
 
 require "chaps/messages"
+require "chaps/server"

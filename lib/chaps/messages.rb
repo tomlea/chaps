@@ -9,7 +9,20 @@ module Chaps
         raise Exception, "Invalid Message Received"
       end
     end
-
+    
+    module Outbound
+      class A0
+        def initialize(random_data)
+          @random_data = random_data
+          raise Exception, "Random Data Should be 50 Chars" unless @random_data.length == 50
+        end
+        
+        def to_s
+          "A0#{@random_data}\n"
+        end
+      end
+    end
+    
     module Inbound
       class A0
         attr_reader :username, :client, :protocol_version
