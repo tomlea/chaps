@@ -3,4 +3,6 @@
 require File.join(File.dirname(__FILE__), *%w[.. lib chaps])
 
 server = Chaps::Server.new
+server.audit = true
+
 server.start.join
