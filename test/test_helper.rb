@@ -4,3 +4,7 @@ require 'rubygems'
 require 'mocha'
 
 TC = Test::Unit::TestCase
+
+class TC
+  include Chaps
+end

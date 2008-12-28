@@ -39,9 +39,31 @@ module Chaps
         end
       end
       
+      class RL
+        def initialize(room, room_count, room_index)
+          @room, @room_count, @room_index = room, room_count, room_index
+        end
+        
+        def to_s
+          "RL%03X%03X%03X\t%s\n" % [@room_index, @room_count, @room.users.size, @room.name]
+        end
+      end
+      
+      class UL
+        def initialize(user, count, index)
+          @user, @count, @index = user, count, index
+        end
+        
+        def to_s
+          "UL%03X%03X\t%s\n" % [@index, @count, @user.name]
+        end
+      end
+      
+      
       module Errors
         BadUsername = ER.new("000")
         BadPassword = ER.new("002")
+        NoSuchRoom =  ER.new("004")
       end
     end
     
@@ -63,6 +85,22 @@ module Chaps
         def initialize(message)
           if matches = message.match(/^([a-f0-9]{32})$/)
             _, @md5 = matches.to_a
+          else
+            raise Exception, "Bad Message"
+          end
+        end
+      end
+      
+      class RL
+        def initialize(message)
+        end
+      end
+      
+      class UL
+        attr_reader :room_name
+        def initialize(message)
+          if matches = message.match(/^(.+)$/)
+            _, @room_name = matches.to_a
           else
             raise Exception, "Bad Message"
           end
