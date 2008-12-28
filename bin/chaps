@@ -1,8 +1,14 @@
 #!/usr/bin/env ruby
 
-require File.join(File.dirname(__FILE__), *%w[.. lib chaps])
+relative_path = File.join(File.dirname(__FILE__), *%w[.. lib chaps.rb])
+
+if File.exist? relative_path
+  require relative_path
+else
+  require 'rubygems'
+  require 'chaps'
+end
 
 server = Chaps::Server.new
 server.audit = true
-
 server.start.join
