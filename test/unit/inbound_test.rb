@@ -28,34 +28,34 @@ end
 
 class A0MessageTest < TC
   def test_should_parse_complete_A0_message
-    a0 = Chaps::Messages::Inbound::A0.new("A0bob\tfoooo4")
+    a0 = Chaps::Messages::Inbound::A0.new("bob\tfoooo4")
     assert_equal "bob", a0.username
     assert_equal "foooo", a0.client
     assert_equal 4, a0.protocol_version
   end
 
   def test_should_parse_legacy_A0_message
-    a0 = Chaps::Messages::Inbound::A0.new("A0bob")
+    a0 = Chaps::Messages::Inbound::A0.new("bob")
     assert_equal "bob", a0.username
     assert_nil a0.client
     assert_equal 0, a0.protocol_version
   end
   def test_should_bail_on_bad_message
-    assert_raise(Exception) { Chaps::Messages::Inbound::A0.new("A0") }
-    assert_raise(Exception) { Chaps::Messages::Inbound::A0.new("A0foo\tbar") }
+    assert_raise(Exception) { Chaps::Messages::Inbound::A0.new("") }
+    assert_raise(Exception) { Chaps::Messages::Inbound::A0.new("foo\tbar") }
   end
 end
 
 class A1MessageTest < TC
   def test_should_parse_A1_message
-    a1 = Chaps::Messages::Inbound::A1.new("A1b6e2b3fd6097b32cb6768a81fb611811")
+    a1 = Chaps::Messages::Inbound::A1.new("b6e2b3fd6097b32cb6768a81fb611811")
     assert_equal "b6e2b3fd6097b32cb6768a81fb611811", a1.md5
   end
   
   def test_should_bail_on_bad_message
-    assert_raise(Exception) { Chaps::Messages::Inbound::A1.new("A1") }
-    assert_raise(Exception) { Chaps::Messages::Inbound::A1.new("A1foo") }
-    assert_raise(Exception) { Chaps::Messages::Inbound::A1.new("A1b6e2b3fd6097b32cb6768a81fb61181K") }
+    assert_raise(Exception) { Chaps::Messages::Inbound::A1.new("") }
+    assert_raise(Exception) { Chaps::Messages::Inbound::A1.new("foo") }
+    assert_raise(Exception) { Chaps::Messages::Inbound::A1.new("b6e2b3fd6097b32cb6768a81fb61181K") }
   end
 end
 
