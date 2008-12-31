@@ -6,7 +6,7 @@ module Chaps
   class Server < GServer
     include Utils
     attr_reader :rooms
-    def initialize(port=10001, *args)
+    def initialize(port=4500, *args)
       super(port, *args)
       @rooms = [Room.new("Hall")]
       @users = []
