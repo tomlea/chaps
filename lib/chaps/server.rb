@@ -2,6 +2,8 @@ require 'gserver'
 require 'yaml'
 require 'digest/md5'
 require 'chaps/utils'
+require 'chaps/logging_io'
+
 module Chaps
   class Server < GServer
     include Utils
@@ -13,6 +15,7 @@ module Chaps
     end
     
     def serve(io)
+      io = LoggingIO.new(io)
       with_error_messages_to(io) do
         return unless user = authenticate(io)
         @users << user
