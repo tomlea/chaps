@@ -11,6 +11,29 @@ module Chaps
     end
     
     module Outbound
+      class ListItem
+        attr_reader :item
+        def initialize(index, total, item = nil)
+          @index, @total, @item = index, total, item
+        end
+        
+        def message_name
+          self.class.name.split("::").last
+        end
+        
+        def to_s
+          "%s%03X%03X%s\n" % [message_name, @index, @total, payload]
+        end
+        
+        def self.for(items)
+          rv = []
+          items.each_with_index do |item, index|
+            rv << new(index, items.size, item)
+          end
+          rv
+        end
+      end
+            
       class A0
         attr_reader :random_data
         def initialize(random_data)
@@ -39,23 +62,17 @@ module Chaps
         end
       end
       
-      class RL
-        def initialize(room, room_count, room_index)
-          @room, @room_count, @room_index = room, room_count, room_index
-        end
-        
-        def to_s
-          "RL%03X%03X%03X\t%s\n" % [@room_index, @room_count, @room.users.size, @room.name]
+      class RL < ListItem
+        alias room item
+        def payload
+          "%03X\t%s" % [room.users.size, room.name]
         end
       end
       
-      class UL
-        def initialize(user, count, index)
-          @user, @count, @index = user, count, index
-        end
-        
-        def to_s
-          "UL%03X%03X\t%s\n" % [@index, @count, @user.name]
+      class UL < ListItem
+        alias user item  
+        def payload
+          "\t%s" % [user.name]
         end
       end
       
@@ -68,6 +85,38 @@ module Chaps
     end
     
     module Inbound
+      class Simple
+        attr_reader :data
+        def initialize(data)
+          self.class.validate(data)
+          @data = data
+        end
+        
+        def self.regexp
+          @regexp || superclass.respond_to?(:regexp) && superclass.regexp
+        end
+        
+        def self.validate(data)
+          if regexp
+            regexp.match(data) or raise Exception, "Bad Message"
+          end
+        end
+        
+        def self.default_method(regexp)
+          klass = Class.new(self)
+          klass.send(:instance_variable_set, :@regexp, regexp)
+          klass
+        end
+      end
+      
+      def self.Simple(regexp = nil)
+        if regexp
+          Simple.default_method(regexp)
+        else
+          Simple
+        end
+      end
+            
       class A0
         attr_reader :username, :client, :protocol_version
         def initialize(message)
@@ -80,31 +129,18 @@ module Chaps
         end
       end
 
-      class A1
-        attr_reader :md5
-        def initialize(message)
-          if matches = message.match(/^([a-f0-9]{32})$/)
-            _, @md5 = matches.to_a
-          else
-            raise Exception, "Bad Message"
-          end
-        end
+      class A1 < Simple(/^([a-f0-9]{32})$/)
+        alias md5 data
       end
       
-      class RL
-        def initialize(message)
-        end
+      class RL < Simple
+      end
+
+      class FL < Simple
       end
       
-      class UL
-        attr_reader :room_name
-        def initialize(message)
-          if matches = message.match(/^(.+)$/)
-            _, @room_name = matches.to_a
-          else
-            raise Exception, "Bad Message"
-          end
-        end
+      class UL < Simple(/.+/)
+        alias room_name data
       end
     end
   end
