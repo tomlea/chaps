@@ -18,7 +18,9 @@ class UserListTest < TC
     @server = Server.new
     @server.stubs(:rooms).returns([])
     io = StringIO.new("")
-    @server.user_list("foo", io)
+    with_error_messages_to(io){
+      @server.user_list("foo", io)
+    }
     io.rewind
     
     assert_equal "ER004\n", io.gets

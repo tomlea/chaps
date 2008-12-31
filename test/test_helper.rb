@@ -7,4 +7,5 @@ TC = Test::Unit::TestCase
 
 class TC
   include Chaps
+  include Chaps::Utils
 end

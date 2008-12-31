@@ -52,7 +52,7 @@ module Chaps
         end
       end
       
-      class ER
+      class ER < Exception
         def initialize(code)
           @code = code
         end

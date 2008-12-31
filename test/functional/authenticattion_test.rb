@@ -55,7 +55,9 @@ protected
 
     pid = fork{
       Timeout::timeout(2){
-        exit 1 unless server.authenticate(server_sock)
+        with_error_messages_to(server_sock){
+          server.authenticate(server_sock)
+        } or exit 1
       }
     }
     
