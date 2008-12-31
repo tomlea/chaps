@@ -25,8 +25,10 @@ module Chaps
     end
     
     def user_list(room_name, io)
-      room = rooms.find{|r| r.name == room_name} or raise Messages::Outbound::Errors::NoSuchRoom
-      io << Messages::Outbound::UL.for(room.users)
+      with_error_messages_to(io) do
+        room = rooms.find{|r| r.name == room_name} or raise Messages::Outbound::Errors::NoSuchRoom
+        io << Messages::Outbound::UL.for(room.users)
+      end
     end
     
     def room_list(io)

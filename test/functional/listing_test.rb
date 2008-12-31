@@ -18,11 +18,21 @@ class UserListTest < TC
     @server = Server.new
     @server.stubs(:rooms).returns([])
     io = StringIO.new("")
-    with_error_messages_to(io){
-      @server.user_list("foo", io)
-    }
+    @server.user_list("foo", io)
     io.rewind
     
+    assert_equal "ER004\n", io.gets
+  end
+
+  def test_room_listing_errors_should_not_be_fatal
+    @server = Server.new
+    @server.stubs(:rooms).returns([])
+    io = StringIO.new("")
+    @server.user_list("foo", io)
+    @server.user_list("foo", io)
+    io.rewind
+    
+    assert_equal "ER004\n", io.gets
     assert_equal "ER004\n", io.gets
   end
   
