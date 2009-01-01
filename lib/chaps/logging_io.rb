@@ -1,11 +1,11 @@
 class LoggingIO
-  def initialize(io)
-    @io = io
+  def initialize(io, enabled = false)
+    @io, @enabled = io, enabled
   end
   
   def gets
     data = @io.gets
-    STDOUT << "<< #{data}"
+    STDOUT << "<< #{data}" if @enabled
     data
   end
   
@@ -14,7 +14,7 @@ class LoggingIO
   end
   
   def <<(data)
-    STDOUT << ">> #{data}"
+    STDOUT << ">> #{data}"  if @enabled
     @io << data
   end
 end

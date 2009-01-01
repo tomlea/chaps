@@ -1,12 +1,14 @@
 module Chaps
   module Messages
     def self.parse(message)
-      message =~ /^(..)(.*)$/
-      code, message = $1, $2
-      if Inbound.const_defined? code
-        Inbound.const_get(code).new(message)
-      else
-        raise Exception, "Invalid Message Received"
+      if message
+        message =~ /^(..)(.*)$/
+        code, payload = $1, $2
+        if code and Inbound.const_defined? code
+          Inbound.const_get(code).new(payload)
+        else
+          raise Exception, "Invalid Message Received: #{message.inspect}"
+        end
       end
     end
     
