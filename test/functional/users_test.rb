@@ -7,20 +7,28 @@ class UserManagmentTest < TC
     with_authenticating_server do |server, connection_factory|
       connection_factory.connect do |io|
         authenticate(io, "test")
-        assert_equal 1, server.users.size, "Server should only have one users right now."
+        assert_has_users 1, server
       end
       
-      sleep 0.1 # let the server track the dropped connection.
-      assert_equal 0, server.users.size
+      assert_has_users 0, server
       
       connection_factory.connect do |io|
         authenticate(io, "test2")
-        assert_equal 1, server.users.size, "Server should only have one users right now."
+        assert_has_users 1, server
       end      
     end
   end
 
-  # def test_server_should_not_remove_unrelated_instances_of_the_same_user
-  #   flunk("TODO")
-  # end
+  def test_server_should_not_remove_unrelated_instances_of_the_same_user
+    with_authenticating_server do |server, connection_factory|
+      connection_factory.connect do |io|
+        authenticate(io, "test")
+        connection_factory.connect do |io2|
+          authenticate(io2, "test")
+          assert_has_users 2, server
+        end      
+        assert_has_users 1, server
+      end      
+    end
+  end
 end

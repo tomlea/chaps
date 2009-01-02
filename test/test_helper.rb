@@ -75,5 +75,11 @@ class TC
     server
   end
   
+  private
+  def assert_has_users(count, server, message = nil)
+    message ||= "Expected server to have #{count} users."
+    sleep 0.001 #Token timeout, as connection close may not be caught otherwise
+    assert_equal count, server.users.size
+  end
 end
 
