@@ -5,7 +5,7 @@ Thread.abort_on_exception=true
 class UserManagmentTest < TC
   def test_server_should_remove_logged_off_users
     with_authenticating_server do |server, connection_factory|
-      connection_factory.with_connection do |io|
+      connection_factory.connect do |io|
         authenticate(io, "test")
         assert_equal 1, server.users.size, "Server should only have one users right now."
       end
@@ -13,7 +13,7 @@ class UserManagmentTest < TC
       sleep 0.1 # let the server track the dropped connection.
       assert_equal 0, server.users.size
       
-      connection_factory.with_connection do |io|
+      connection_factory.connect do |io|
         authenticate(io, "test2")
         assert_equal 1, server.users.size, "Server should only have one users right now."
       end      

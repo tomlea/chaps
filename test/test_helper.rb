@@ -10,27 +10,32 @@ TC = Test::Unit::TestCase
 class TC
   include Chaps
   include Chaps::Utils
-  
+
   protected
   class ConnectionFactory
-    def initialize(port)
-      @port = port
+    def initialize(port, host = "127.0.0.1")
+      @port, @host = port, host
       @sockets = []
     end
-    
+
     def new_client
-      socket = TCPSocket.new("127.0.0.1", @port)
-      @sockets << socket
-      socket
+      TCPSocket.new(@host, @port)
     end
-    
-    def with_connection
+
+    def connect(&block)
       sock = new_client
-      yield sock
-    ensure
-      sock.close if sock
+      if block_given?
+        begin
+          yield sock
+        ensure
+          sock.close
+        end
+      else
+        @sockets << sock
+        sock
+      end
     end
-    
+
     def clean_up!
       @sockets.each do |sock|
         sock.close unless sock.closed?
