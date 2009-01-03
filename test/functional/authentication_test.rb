@@ -14,6 +14,20 @@ class AuthenticationTest < TC
       assert_has_users 1, server
     end
   end
+
+  def test_should_authenticate_double_md5_client
+    server = with_authenticating_server do |server, client_factory|
+      client_sock = client_factory.connect
+      client_sock.puts "A0test"
+      message = client_sock.gets
+      assert_match /A0(.{50})/, message
+      salt = message[/.{50}$/]
+      digest = Digest::MD5.hexdigest(salt + Digest::MD5.hexdigest("test"))
+      client_sock.puts "A1#{digest}"
+      assert_match "A1U", client_sock.gets
+      assert_has_users 1, server
+    end
+  end
   
   def test_should_fail_auth
     server = with_authenticating_server do |server, client_factory|

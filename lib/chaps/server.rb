@@ -56,7 +56,9 @@ module Chaps
       a1 = expect(io, :A1)
       
       raise Messages::Outbound::Errors::BadUsername unless password
-      raise Messages::Outbound::Errors::BadPassword unless a1.md5 == Digest::MD5.hexdigest(salt + password)
+      unless a1.md5 == Digest::MD5.hexdigest(salt + password) or a1.md5 == Digest::MD5.hexdigest(salt + Digest::MD5.hexdigest(password))
+        raise Messages::Outbound::Errors::BadPassword
+      end
       
       io << Messages::Outbound::A1.new
       
