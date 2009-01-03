@@ -11,7 +11,7 @@ class AuthenticationTest < TC
       digest = Digest::MD5.hexdigest(salt + "test")
       client_sock.puts "A1#{digest}"
       assert_match "A1U", client_sock.gets
-      assert_equal 1, server.users.size, "authenticate should have authenticated client."    
+      assert_has_users 1, server
     end
   end
   
@@ -25,7 +25,7 @@ class AuthenticationTest < TC
       digest = Digest::MD5.hexdigest(salt + "bad_password")
       client_sock.puts "A1#{digest}"
       assert_match "ER002", client_sock.gets
-      assert_equal 0, server.users.size, "authenticate should not have authenticated client."    
+      assert_has_users 0, server
     end
   end
   
@@ -38,7 +38,7 @@ class AuthenticationTest < TC
       digest = Digest::MD5.hexdigest(salt + "bad_password")
       client_sock.puts "A1#{digest}"
       assert_match "ER000", client_sock.gets, "Expected bad username."
-      assert_equal 0, server.users.size, "authenticate should not have authenticated client."    
+      assert_has_users 0, server
     end    
   end
 end
