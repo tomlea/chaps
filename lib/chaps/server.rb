@@ -26,13 +26,15 @@ module Chaps
           end
         end
       end
-    rescue Errno::EPIPE
-      trace "Client quit"
     rescue "stop"
-    rescue => e
-      error "#{e.class}: #{e.message}"
-      error e.backtrace
+    rescue Errno::EPIPE
+      puts "Client quit" if audit
+    rescue Object => e
+      puts "#{e.class}: #{e.message}" if audit
+      puts e.backtrace if audit
       raise
+    ensure
+      io.close unless io.closed?
     end
 
     def user_list(room_name, io)

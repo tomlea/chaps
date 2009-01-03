@@ -77,6 +77,13 @@ module Chaps
           "\t%s" % [user.name]
         end
       end
+
+      class FL < ListItem
+        alias name item  
+        def payload
+          "\t%s\tU0Offline\tUsers" % [name]
+        end
+      end
       
       
       module Errors

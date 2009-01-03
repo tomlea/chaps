@@ -2,6 +2,7 @@ require 'thread'
 
 module Chaps
   class User
+    attr_reader :name
     def initialize(name, server)
       @name, @server = name, server
       @outbound_queue = Queue.new()
@@ -21,6 +22,14 @@ module Chaps
       end
     end
     
+    def friends
+      self.class.friends_for(name)
+    end
+    
+    def self.friends_for(name)
+      %w{you have no friends}
+    end
+    
     def serve(io)
       t = Thread.new(io) { |outbound_io|
         while m = @outbound_queue.shift
@@ -28,12 +37,16 @@ module Chaps
         end
       }
       
-      while(message = Messages.parse(io.gets))
+      while(message = Messages.parse(raw_message = io.gets))
         case message
         when Messages::Inbound::RL
           @server.room_list(self)
         when Messages::Inbound::UL
           @server.user_list(message.room_name, self)
+        when Messages::Inbound::FL
+          self << Messages::Outbound::FL.for(friends)
+        else
+          raise Exception, "Bad message: #{raw_message.inspect}"
         end
       end
     ensure
