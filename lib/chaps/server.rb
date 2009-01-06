@@ -12,16 +12,22 @@ module Chaps
       super(port, *args)
       @rooms = [Room.new("Hall")]
       @users = []
+      @sessions = []
     end
     
     def find_user(name)
-      @users.find{|u| u.name == name}
+      @users.find{|u| u.name == name} || (
+        user = User.new(name)
+        @users << user
+        user
+      )
     end
 
     def serve(io)
       handle_session(io)
     rescue Errno::EPIPE
       log "Client quit"
+    rescue UserSession::ShutdownSession => e  
     rescue Object => e
       return if e.message == "stop"
       log "#{e.class}: #{e.message}"
@@ -35,10 +41,11 @@ module Chaps
       with_error_messages_to(io) do
         if user = authenticate(io)
           begin
-            @users.push user
-            user.serve(io)
+            user.current_session.close if user.online?
+            user.current_session = UserSession.new(user, self)
+            user.current_session.serve(io)
           ensure
-            @users.delete(user)
+            user.current_session.close if user.current_session
           end
         end
       end
@@ -69,7 +76,7 @@ module Chaps
       
       io << Messages::Outbound::A1.new
       
-      return User.new(a0.username, self)
+      return find_user(a0.username)
     end
     
     def password_for(username)

@@ -19,16 +19,17 @@ class UserManagmentTest < TC
     end
   end
 
-  def test_server_should_not_remove_unrelated_instances_of_the_same_user
+  def test_server_should_clean_up_double_logins
     with_authenticating_server do |server, connection_factory|
       connection_factory.connect do |io|
         authenticate(io, "test")
         connection_factory.connect do |io2|
           authenticate(io2, "test")
-          assert_has_users 2, server
-        end      
-        assert_has_users 1, server
-      end      
+          assert_has_users 1, server
+          assert io.eof?, "Expected socket to have been closed"
+        end
+        assert_has_users 0, server
+      end
     end
   end
 end

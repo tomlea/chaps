@@ -79,17 +79,13 @@ module Chaps
       end
 
       class FL < ListItem
-        def name
-          item.first
-        end
-        def status
-          item.last
-        end
+        alias friend item
+        
         def payload
-          if status == :offline
-            "\t%s\tU0Offline\tUsers" % [name]
+          if friend.online?
+            "\t%s\tU1Online\tUsers" % [friend.name]
           else
-            "\t%s\tU1Online\tUsers" % [name]
+            "\t%s\tU0Offline\tUsers" % [friend.name]
           end
         end
       end

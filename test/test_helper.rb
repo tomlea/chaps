@@ -76,10 +76,11 @@ class TC
   end
   
   private
-  def assert_has_users(count, server, message = nil)
-    message ||= "Expected server to have #{count} users."
-    sleep 0.001 #Token timeout, as connection close may not be caught otherwise
-    assert_equal count, server.users.size
+  def assert_has_users(expected, server, message = nil)
+    message ||= "Expected server to have <%i> users, but it has <%i>."
+    sleep 0.01 #Token timeout, as connection close may not be caught otherwise
+    actual = server.users.select{|u| u.online?}.size
+    assert_equal expected, actual, message % [expected, actual]
   end
 end
 
