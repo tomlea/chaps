@@ -37,12 +37,9 @@ end
 class FreindListingTest < TC
   def test_friend_listing
     User.stubs(:friends_for).with("test").returns(["test2"])
-    with_authenticating_server do |server, connection_factory|
-      connection_factory.connect do |io|
-        authenticate(io, "test")
-        io.puts "FL"
-        assert_match /FL000001\ttest2\tU0Offline\tUsers/, io.gets
-      end      
+    with_client(:username => "test") do |server, client|
+      client.friend_list
+      assert_match /FL000001\ttest2\tU0Offline\tUsers/, client.gets
     end
   end
   

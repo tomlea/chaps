@@ -27,7 +27,6 @@ module Chaps
       handle_session(io)
     rescue Errno::EPIPE
       log "Client quit"
-    rescue UserSession::ShutdownSession => e  
     rescue Object => e
       return if e.message == "stop"
       log "#{e.class}: #{e.message}"
@@ -45,21 +44,14 @@ module Chaps
             user.current_session = UserSession.new(user, self)
             user.current_session.serve(io)
           ensure
-            user.current_session.close if user.current_session
+            user.current_session = nil
           end
         end
       end
     end
 
-    def user_list(room_name, io)
-      with_error_messages_to(io) do
-        room = rooms.find{|r| r.name == room_name} or raise Messages::Outbound::Errors::NoSuchRoom
-        io << Messages::Outbound::UL.for(room.users)
-      end
-    end
-
-    def room_list(io)
-      io << Messages::Outbound::RL.for(rooms)
+    def find_room(room_name)
+      rooms.find{|r| r.name == room_name}
     end
 
     def authenticate(io)

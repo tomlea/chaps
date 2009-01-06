@@ -75,6 +75,32 @@ class TC
     server
   end
   
+  def with_client(options = {}, &block)
+    with_authenticating_server do |server, factory|
+      server.audit = true if options[:audit] || options[:debug]
+      server.debug = true if options[:debug]
+      factory.connect do |io|
+        authenticate(io, options[:username] || "test", options[:password])
+        io.extend ClientHelperMixin
+        yield server, io
+      end
+    end
+  end
+  
+  module ClientHelperMixin
+    def room_list
+      puts "RL"
+    end
+
+    def user_list(room)
+      puts "UL#{room}"
+    end
+    
+    def friend_list
+      puts "FL"
+    end
+  end
+  
   private
   def assert_has_users(expected, server, message = nil)
     message ||= "Expected server to have <%i> users, but it has <%i>."

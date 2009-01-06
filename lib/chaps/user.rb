@@ -2,6 +2,8 @@ require 'thread'
 
 module Chaps
   class UserSession
+    include Utils
+    
     class ShutdownSession < Exception; end
     
     def initialize(user, server)
@@ -18,7 +20,7 @@ module Chaps
       end
       
       if @master_thread and @master_thread.alive?
-        @master_thread.raise ShutdownSession, "Duplicate login"
+        @master_thread.raise ShutdownSession
         @master_thread.join
       end
     end
@@ -53,9 +55,12 @@ module Chaps
     def handle_mesage(message)
       case message
       when Messages::Inbound::RL
-        @server.room_list(self)
+        send Messages::Outbound::RL.for(@server.rooms)
       when Messages::Inbound::UL
-        @server.user_list(message.room_name, self)
+        with_error_messages_to(self) do
+          room = @server.find_room(message.room_name) or raise Messages::Outbound::Errors::NoSuchRoom
+          send Messages::Outbound::UL.for(room.users)
+        end        
       when Messages::Inbound::FL
         send Messages::Outbound::FL.for(friends)
       end
