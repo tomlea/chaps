@@ -10,7 +10,7 @@ module Chaps
             username unless username =~ /bad_/
           end
           yield server, factory
-        end    
+        end
       end
     end
 
