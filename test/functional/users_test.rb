@@ -44,4 +44,19 @@ class FreindListingTest < TC
       end      
     end
   end
+  
+  def test_should_show_online_friends
+    User.stubs(:friends_for).with("test").returns(["test2"])
+    User.stubs(:friends_for).with("test2").returns(["test"])
+    with_authenticating_server do |server, connection_factory|
+      connection_factory.connect do |test_io|
+        authenticate(test_io, "test")
+        connection_factory.connect do |test2_io|
+          authenticate(test2_io, "test2")
+          test2_io.puts "FL"
+          assert_match /FL000001\ttest\tU1Online\tUsers/, test2_io.gets
+        end
+      end      
+    end
+  end
 end

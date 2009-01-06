@@ -13,6 +13,10 @@ module Chaps
       @rooms = [Room.new("Hall")]
       @users = []
     end
+    
+    def find_user(name)
+      @users.find{|u| u.name == name}
+    end
 
     def serve(io)
       handle_session(io)

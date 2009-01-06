@@ -23,7 +23,9 @@ module Chaps
     end
     
     def friends
-      self.class.friends_for(name)
+      self.class.friends_for(name).inject({}){|collection, friend_name| 
+        collection.merge( friend_name => @server.find_user(friend_name) || :offline )
+      }
     end
     
     def self.friends_for(name)
