@@ -15,6 +15,18 @@ module Chaps
     end
 
     def serve(io)
+      handle_session(io)
+    rescue Errno::EPIPE
+      log "Client quit"
+    rescue Object => e
+      return if e.message == "stop"
+      log "#{e.class}: #{e.message}"
+      log e.backtrace
+    ensure
+      io.close unless io.closed?
+    end
+
+    def handle_session(io)
       io = LoggingIO.new(io, audit)
       with_error_messages_to(io) do
         if user = authenticate(io)
@@ -26,15 +38,6 @@ module Chaps
           end
         end
       end
-    rescue "stop"
-    rescue Errno::EPIPE
-      puts "Client quit" if audit
-    rescue Object => e
-      puts "#{e.class}: #{e.message}" if audit
-      puts e.backtrace if audit
-      raise
-    ensure
-      io.close unless io.closed?
     end
 
     def user_list(room_name, io)
