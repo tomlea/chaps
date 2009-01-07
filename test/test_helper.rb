@@ -21,7 +21,44 @@ class TC
     assert(io.gets =~ /A0(.{50})/, "Did not get A0 from server when doing auth (#{username}/#{password}).")
     hash = Digest::MD5.hexdigest($1+password)
     io.puts "A1#{hash}"
-    assert_match /A1.+/, io.gets, "Did not get A1 from server when doing auth (#{username}/#{password})."
+    assert_match( /A1.+/, io.gets, "Did not get A1 from server when doing auth (#{username}/#{password}).")
+  end
+  
+  class FileSystemStub
+    def initialize()
+      @fake_file_system = {}
+    end
+    
+    def open(filename, mode = "r")
+      @fake_file_system[filename] ||= StringIO.new if mode == "w"
+      raise Errno::ENOENT, "No such file or directory - #{filename}" unless @fake_file_system[filename]
+      @fake_file_system[filename].rewind
+      if block_given?
+        yield @fake_file_system[filename]
+      else
+        @fake_file_system[filename]
+      end
+    end
+    
+    def read(filename)
+      File.open(filename, "r") do |io|
+        io.read
+      end
+    end
+    
+    def exist?(filename)
+      @fake_file_system.has_key? filename
+    end
+  end
+  
+  def with_stubbed_file_store(&block)
+    file_class = File
+    Object.send :remove_const, :File
+    Object.const_set(:File, FileSystemStub.new)
+    yield
+  ensure
+    Object.send :remove_const, :File
+    Object.const_set(:File, file_class)    
   end
   
   private

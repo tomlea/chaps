@@ -1,7 +1,5 @@
 require File.join(File.dirname(__FILE__), *%w[.. test_helper])
 
-Thread.abort_on_exception=true
-
 class UserManagmentTest < TC
   def test_server_should_remove_logged_off_users
     with_authenticating_server do |server, connection_factory|
